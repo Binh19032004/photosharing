@@ -1,14 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Typography} from "@mui/material";
-import models from '../../modelData/models'; 
-import './styles.css';
-function UserDetail() {
-  
-  const { userId } = useParams();
+import { Typography } from "@mui/material";
 
-  
-  const user = models.userModel(userId); 
+function UserDetail() {
+  const { userId } = useParams();
+  const [user, setUser] = useState(null);
+
+  // Fetch user details from the backend API
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await fetch(`http://localhost:8081/api/user/${userId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setUser(data);
+        } else {
+          console.error('Error fetching user:', await response.text());
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error);
+        setUser(null);
+      }
+    };
+
+    fetchUser();
+  }, [userId]);
 
   return (
     <div>
@@ -20,7 +37,6 @@ function UserDetail() {
           <Typography variant="body1">Location: {user.location}</Typography>
           <Typography variant="body1">Description: {user.description}</Typography>
           <Typography variant="body1">Occupation: {user.occupation}</Typography>
-          
           <Link to={`/photos/${user._id}`}>View Photos</Link>
         </>
       ) : (
